@@ -128,4 +128,80 @@
                                       stroke-linecap="round"/>
                                 <path d="M 60 80 A 120 120 0 0 1 110 38" 
                                       fill="none" 
-                                      stroke="#f6a623"
+                                      stroke="#f6a623" 
+                                      stroke-width="25" 
+                                      stroke-linecap="round"/>
+                                <path d="M 110 38 A 120 120 0 0 1 150 25" 
+                                      fill="none" 
+                                      stroke="#f5d330" 
+                                      stroke-width="25" 
+                                      stroke-linecap="round"/>
+                                <path d="M 150 25 A 120 120 0 0 1 190 38" 
+                                      fill="none" 
+                                      stroke="#93d900" 
+                                      stroke-width="25" 
+                                      stroke-linecap="round"/>
+                                <path d="M 190 38 A 120 120 0 0 1 240 80" 
+                                      fill="none" 
+                                      stroke="#16c784" 
+                                      stroke-width="25" 
+                                      stroke-linecap="round"/>
+                                <path d="M 240 80 A 120 120 0 0 1 270 140" 
+                                      fill="none" 
+                                      stroke="#16c784" 
+                                      stroke-width="25" 
+                                      stroke-linecap="round"/>
+                                
+                                <!-- 중심점 -->
+                                <circle cx="${centerX}" cy="${centerY}" r="8" fill="#333"/>
+                                
+                                <!-- 바늘 -->
+                                <line x1="${centerX}" y1="${centerY}" 
+                                      x2="${needleX}" y2="${needleY}" 
+                                      stroke="${color}" 
+                                      stroke-width="4" 
+                                      stroke-linecap="round"/>
+                                
+                                <!-- 바늘 끝 원 -->
+                                <circle cx="${needleX}" cy="${needleY}" r="6" fill="${color}"/>
+                                
+                                <!-- 숫자 표시 -->
+                                <text x="30" y="165" font-size="12" fill="#666">0</text>
+                                <text x="145" y="15" font-size="12" fill="#666" text-anchor="middle">50</text>
+                                <text x="265" y="165" font-size="12" fill="#666" text-anchor="end">100</text>
+                            </svg>
+                        </div>
+                        <div class="value-display" style="color: ${color};">${value}</div>
+                        <div class="classification" style="color: ${color};">${getKoreanClassification(classification)}</div>
+                        <div class="legend">
+                            <span style="color: #ea3943;">극도의 공포 (0-25)</span>
+                            <span style="color: #16c784;">극도의 탐욕 (75-100)</span>
+                        </div>
+                        <div class="timestamp">마지막 업데이트: ${timestamp}</div>
+                    `;
+                    
+                    document.getElementById('content').innerHTML = html;
+                } else {
+                    throw new Error('데이터 없음');
+                }
+            } catch (error) {
+                document.getElementById('content').innerHTML = '<div class="loading">데이터를 불러올 수 없습니다.</div>';
+            }
+        }
+        
+        function getKoreanClassification(classification) {
+            const map = {
+                'Extreme Fear': '극도의 공포',
+                'Fear': '공포',
+                'Neutral': '중립',
+                'Greed': '탐욕',
+                'Extreme Greed': '극도의 탐욕'
+            };
+            return map[classification] || classification;
+        }
+        
+        loadFearGreedIndex();
+        setInterval(loadFearGreedIndex, 60000); // 1분마다 업데이트
+    </script>
+</body>
+</html>
