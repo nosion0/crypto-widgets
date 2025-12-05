@@ -12,71 +12,130 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: transparent;
+            background: #f8f9fa;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
         .container {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-            max-width: 500px;
+            border-radius: 16px;
+            padding: 30px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             width: 100%;
+            max-width: 400px;
             text-align: center;
         }
         h1 {
-            font-size: 28px;
+            font-size: 22px;
             color: #333;
             margin-bottom: 30px;
             font-weight: 700;
         }
-        .gauge-container {
+        .gauge-wrapper {
             position: relative;
-            width: 300px;
-            height: 180px;
+            width: 280px;
+            height: 140px;
             margin: 0 auto 20px;
         }
-        .gauge {
-            width: 100%;
-            height: 100%;
+        .gauge-bg {
+            width: 280px;
+            height: 140px;
+            background: linear-gradient(to right, #ea3943 0%, #f6a623 25%, #f5d330 50%, #93d900 75%, #16c784 100%);
+            border-radius: 140px 140px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .gauge-overlay {
+            position: absolute;
+            width: 220px;
+            height: 110px;
+            background: white;
+            border-radius: 110px 110px 0 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .needle-container {
+            position: absolute;
+            width: 4px;
+            height: 100px;
+            background: #333;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            transition: transform 0.5s ease;
+            border-radius: 2px 2px 0 0;
+        }
+        .needle-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .center-dot {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #333;
+            border-radius: 50%;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
         }
         .value-display {
-            font-size: 64px;
+            font-size: 56px;
             font-weight: 700;
-            margin: 10px 0;
-            color: #333;
+            margin: 15px 0 5px;
         }
         .classification {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 600;
-            margin: 15px 0;
+            margin-bottom: 15px;
         }
-        .timestamp {
-            color: #666;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-        .loading {
-            font-size: 18px;
+        .scale {
+            display: flex;
+            justify-content: space-between;
+            width: 280px;
+            margin: 10px auto 20px;
+            font-size: 12px;
             color: #666;
         }
         .legend {
             display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            font-size: 12px;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 11px;
             color: #666;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .legend-item {
+            display: inline-block;
+        }
+        .timestamp {
+            color: #999;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+        .loading {
+            font-size: 16px;
+            color: #666;
+            padding: 40px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>암호화폐 공포&탐욕 지수</h1>
-        <div id="content" class="loading">데이터를 불러오는 중...</div>
+        <div id="content" class="loading">로딩 중...</div>
     </div>
 
     <script>
@@ -99,85 +158,34 @@
                     else if (value <= 75) color = '#93d900';
                     else color = '#16c784';
                     
-                    // 각도 계산 (0-100을 180도로 변환, 왼쪽에서 오른쪽)
-                    const angle = (value / 100) * 180;
-                    const radian = (angle - 90) * (Math.PI / 180);
-                    
-                    // 바늘 끝점 계산
-                    const centerX = 150;
-                    const centerY = 140;
-                    const needleLength = 70;
-                    const needleX = centerX + Math.cos(radian) * needleLength;
-                    const needleY = centerY + Math.sin(radian) * needleLength;
+                    // 바늘 각도 계산 (0 = -90deg, 50 = 0deg, 100 = 90deg)
+                    const angle = (value / 100) * 180 - 90;
                     
                     const html = `
-                        <div class="gauge-container">
-                            <svg class="gauge" viewBox="0 0 300 180">
-                                <!-- 배경 호 (회색) -->
-                                <path d="M 30 140 A 120 120 0 0 1 270 140" 
-                                      fill="none" 
-                                      stroke="#e0e0e0" 
-                                      stroke-width="25" 
-                                      stroke-linecap="round"/>
-                                
-                                <!-- 색상 구간들 -->
-                                <path d="M 30 140 A 120 120 0 0 1 60 80" 
-                                      fill="none" 
-                                      stroke="#ea3943" 
-                                      stroke-width="25" 
-                                      stroke-linecap="round"/>
-                                <path d="M 60 80 A 120 120 0 0 1 110 38" 
-                                      fill="none" 
-                                      stroke="#f6a623" 
-                                      stroke-width="25" 
-                                      stroke-linecap="round"/>
-                                <path d="M 110 38 A 120 120 0 0 1 150 25" 
-                                      fill="none" 
-                                      stroke="#f5d330" 
-                                      stroke-width="25" 
-                                      stroke-linecap="round"/>
-                                <path d="M 150 25 A 120 120 0 0 1 190 38" 
-                                      fill="none" 
-                                      stroke="#93d900" 
-                                      stroke-width="25" 
-                                      stroke-linecap="round"/>
-                                <path d="M 190 38 A 120 120 0 0 1 240 80" 
-                                      fill="none" 
-                                      stroke="#16c784" 
-                                      stroke-width="25" 
-                                      stroke-linecap="round"/>
-                                <path d="M 240 80 A 120 120 0 0 1 270 140" 
-                                      fill="none" 
-                                      stroke="#16c784" 
-                                      stroke-width="25" 
-                                      stroke-linecap="round"/>
-                                
-                                <!-- 중심점 -->
-                                <circle cx="${centerX}" cy="${centerY}" r="8" fill="#333"/>
-                                
-                                <!-- 바늘 -->
-                                <line x1="${centerX}" y1="${centerY}" 
-                                      x2="${needleX}" y2="${needleY}" 
-                                      stroke="${color}" 
-                                      stroke-width="4" 
-                                      stroke-linecap="round"/>
-                                
-                                <!-- 바늘 끝 원 -->
-                                <circle cx="${needleX}" cy="${needleY}" r="6" fill="${color}"/>
-                                
-                                <!-- 숫자 표시 -->
-                                <text x="30" y="165" font-size="12" fill="#666">0</text>
-                                <text x="145" y="15" font-size="12" fill="#666" text-anchor="middle">50</text>
-                                <text x="265" y="165" font-size="12" fill="#666" text-anchor="end">100</text>
-                            </svg>
+                        <div class="gauge-wrapper">
+                            <div class="gauge-bg">
+                                <div class="gauge-overlay"></div>
+                            </div>
+                            <div class="needle-container" style="transform: translateX(-50%) rotate(${angle}deg);">
+                                <div class="needle-dot"></div>
+                            </div>
+                            <div class="center-dot"></div>
+                        </div>
+                        <div class="scale">
+                            <span>0</span>
+                            <span>50</span>
+                            <span>100</span>
                         </div>
                         <div class="value-display" style="color: ${color};">${value}</div>
                         <div class="classification" style="color: ${color};">${getKoreanClassification(classification)}</div>
                         <div class="legend">
-                            <span style="color: #ea3943;">극도의 공포 (0-25)</span>
-                            <span style="color: #16c784;">극도의 탐욕 (75-100)</span>
+                            <span class="legend-item" style="color: #ea3943;">극도의 공포</span>
+                            <span class="legend-item" style="color: #f6a623;">공포</span>
+                            <span class="legend-item" style="color: #f5d330;">중립</span>
+                            <span class="legend-item" style="color: #93d900;">탐욕</span>
+                            <span class="legend-item" style="color: #16c784;">극도의 탐욕</span>
                         </div>
-                        <div class="timestamp">마지막 업데이트: ${timestamp}</div>
+                        <div class="timestamp">${timestamp}</div>
                     `;
                     
                     document.getElementById('content').innerHTML = html;
@@ -201,7 +209,7 @@
         }
         
         loadFearGreedIndex();
-        setInterval(loadFearGreedIndex, 60000); // 1분마다 업데이트
+        setInterval(loadFearGreedIndex, 300000); // 5분마다 업데이트
     </script>
 </body>
 </html>
