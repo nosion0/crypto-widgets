@@ -12,7 +12,7 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,7 +23,7 @@
             background: white;
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
             max-width: 500px;
             width: 100%;
             text-align: center;
@@ -37,8 +37,8 @@
         .gauge-container {
             position: relative;
             width: 300px;
-            height: 150px;
-            margin: 0 auto 30px;
+            height: 180px;
+            margin: 0 auto 20px;
         }
         .gauge {
             width: 100%;
@@ -47,11 +47,8 @@
         .value-display {
             font-size: 64px;
             font-weight: 700;
-            margin: 20px 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin: 10px 0;
+            color: #333;
         }
         .classification {
             font-size: 28px;
@@ -102,61 +99,33 @@
                     else if (value <= 75) color = '#93d900';
                     else color = '#16c784';
                     
+                    // 각도 계산 (0-100을 180도로 변환, 왼쪽에서 오른쪽)
+                    const angle = (value / 100) * 180;
+                    const radian = (angle - 90) * (Math.PI / 180);
+                    
+                    // 바늘 끝점 계산
+                    const centerX = 150;
+                    const centerY = 140;
+                    const needleLength = 70;
+                    const needleX = centerX + Math.cos(radian) * needleLength;
+                    const needleY = centerY + Math.sin(radian) * needleLength;
+                    
                     const html = `
                         <div class="gauge-container">
-                            <svg class="gauge" viewBox="0 0 200 100">
-                                <path d="M 10 90 A 80 80 0 0 1 190 90" 
+                            <svg class="gauge" viewBox="0 0 300 180">
+                                <!-- 배경 호 (회색) -->
+                                <path d="M 30 140 A 120 120 0 0 1 270 140" 
                                       fill="none" 
                                       stroke="#e0e0e0" 
-                                      stroke-width="20" 
+                                      stroke-width="25" 
                                       stroke-linecap="round"/>
-                                <path d="M 10 90 A 80 80 0 0 1 ${10 + (180 * value / 100)} ${90 - Math.sin(Math.PI * value / 100) * 80}" 
+                                
+                                <!-- 색상 구간들 -->
+                                <path d="M 30 140 A 120 120 0 0 1 60 80" 
                                       fill="none" 
-                                      stroke="${color}" 
-                                      stroke-width="20" 
+                                      stroke="#ea3943" 
+                                      stroke-width="25" 
                                       stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                        <div class="value-display">${value}</div>
-                        <div class="classification" style="color: ${color};">${getKoreanClassification(classification)}</div>
-                        <div class="legend">
-                            <span style="color: #ea3943;">극도의 공포 (0-25)</span>
-                            <span style="color: #16c784;">극도의 탐욕 (75-100)</span>
-                        </div>
-                        <div class="timestamp">마지막 업데이트: ${timestamp}</div>
-                    `;
-                    
-                    document.getElementById('content').innerHTML = html;
-                } else {
-                    throw new Error('데이터 없음');
-                }
-            } catch (error) {
-                document.getElementById('content').innerHTML = '<div class="loading">데이터를 불러올 수 없습니다.</div>';
-            }
-        }
-        
-        function getKoreanClassification(classification) {
-            const map = {
-                'Extreme Fear': '극도의 공포',
-                'Fear': '공포',
-                'Neutral': '중립',
-                'Greed': '탐욕',
-                'Extreme Greed': '극도의 탐욕'
-            };
-            return map[classification] || classification;
-        }
-        
-        loadFearGreedIndex();
-        setInterval(loadFearGreedIndex, 60000); // 1분마다 업데이트
-    </script>
-</body>
-</html>
-```
-
-4. **Commit changes** 클릭
-
----
-
-## 1-2분 후 이 URL 사용:
-```
-https://nosion0.github.io/crypto-widgets/crypto-fear-greed.html
+                                <path d="M 60 80 A 120 120 0 0 1 110 38" 
+                                      fill="none" 
+                                      stroke="#f6a623"
