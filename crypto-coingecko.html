@@ -10,6 +10,13 @@
             padding: 0;
             background: #ffffff;
         }
+        /* CoinGecko 하단 텍스트 숨기기 */
+        coingecko-coin-list-widget::part(footer),
+        [class*="powered"],
+        [class*="footer"],
+        a[href*="coingecko"] {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
